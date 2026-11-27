@@ -39,6 +39,11 @@ class User extends Authenticatable
         return $this->belongsTo(UnitKerjaModel::class, 'id_unit', 'id');
     }
 
+    public function relasiUserKePenilaianResiko()
+    {
+        return $this->hasMany(PenilaianResikoModel::class, 'id_pengguna', 'id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

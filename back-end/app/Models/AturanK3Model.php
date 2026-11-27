@@ -32,7 +32,7 @@ class AturanK3Model extends Model
         return $this->belongsTo(DimensiBahayaModel::class, 'id_dimensi', 'id');
     }
 
-   public function relasiAturanK3KeUnitKerja()
+    public function relasiAturanK3KeUnitKerja()
     {
         return $this->belongsTo(UnitKerjaModel::class, 'id_unit', 'id');
     }
@@ -47,4 +47,8 @@ class AturanK3Model extends Model
         return $this->belongsTo(HierarkiNioshModel::class, 'id_hierarki', 'id');
     }
 
+    public function relasiAturanK3KeDetailInputFakta()
+    {
+        return $this->hasMany(DetailInputFaktaModel::class, 'id_aturan', 'id');
+    }
 }

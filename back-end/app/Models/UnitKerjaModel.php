@@ -22,4 +22,14 @@ class UnitKerjaModel extends Model
     {
         return $this->hasMany(User::class, 'id_unit','id');
     }
+
+    public function relasiUnitKerjaKeAturanK3()
+    {
+        return $this->hasMany(AturanK3Model::class, 'id_unit', 'id');
+    }
+
+    public function relasiUnitKerjaKePenilaianResiko()
+    {
+        return $this->hasMany(PenilaianResikoModel::class,'id_unit','id');
+    }
 }
