@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('detail_input_fakta_models', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('id_penilaian');
+            $table->unsignedBigInteger('id_penilaian');
             $table->unsignedBigInteger('id_aturan');
             $table->boolean('kondisi_if_terpilih')->default(false);
             $table->boolean('kondisi_and_terpilih');

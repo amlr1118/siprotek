@@ -51,4 +51,9 @@ class AturanK3Model extends Model
     {
         return $this->hasMany(DetailInputFaktaModel::class, 'id_aturan', 'id');
     }
+
+    public function relasiAturanK3KeDetailEvaluasiAturan()
+    {
+        return $this->hasMany(DetailEvaluasiAturanModel::class, 'id_aturan', 'id');
+    }
 }

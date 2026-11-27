@@ -29,5 +29,10 @@ class KategoriResikoModel extends Model
         return $this->hasMany(PenilaianResikoModel::class,'id_resiko_tertinggi','id');
     }
 
+    public function relasiKategoriResikoKeDetailEvaluasiAturan()
+    {
+        return $this->hasMany(DetailEvaluasiAturanModel::class, 'id_kategori_resiko', 'id');
+    }
+
 
 }

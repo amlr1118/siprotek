@@ -17,4 +17,20 @@ class DetailEvaluasiAturanModel extends Model
         'catatan_tindak_lanjut',
 
     ];
+
+
+    public function relasiDetailEvaluasiAturanKePenilaianResiko()
+    {
+        return $this->belongsTo(PenilaianResikoModel::class, 'id_penilaian', 'id');
+    }
+
+    public function relasiDetailEvaluasiAturanKeAturanK3()
+    {
+        return $this->belongsTo(AturanK3Model::class, 'id_aturan', 'id');
+    }
+
+    public function relasiDetailEvaluasiAturanKeKategoriResiko()
+    {
+        return $this->belongsTo(KategoriResikoModel::class, 'id_kategori_resiko', 'id');
+    }
 }

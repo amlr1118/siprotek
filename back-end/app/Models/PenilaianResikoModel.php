@@ -43,5 +43,10 @@ class PenilaianResikoModel extends Model
         return $this->hasMany(DetailInputFaktaModel::class, 'id_penilaian', 'id');
     }
 
+    public function relasiPenilaianResikoKeDetailEvaluasiAturan()
+    {
+        return $this->hasMany(DetailEvaluasiAturanModel::class, 'id_penilaian', 'id');
+    }
+
 
 }
