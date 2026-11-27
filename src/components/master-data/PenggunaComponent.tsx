@@ -6,18 +6,33 @@ import { Modal } from "../ui/modal";
 import api from "../../services/api";
 
 // --- INTERFACES ---
+interface UnitKerja {
+  id: number;
+  kode_unit: string;
+  nama_unit: string;
+  kategori_area?: string;
+}
+
 interface Inputan {
   id: number;
-  userid: string;
-  name: string;
-  role: string | number; // PERBAIKAN: Menerima angka (TINYINT) dari database
-  email: string;
-  password: string;
+  id_pengguna: string;
+  id_unit: string | number;
+  nama_lengkap: string;
+  role: string | number;
+  jenis_profesi: string;
+  masa_kerja: string;
+  password?: string;
+  relasi_ke_unit_kerja?: UnitKerja | null; // Objek relasi dari Laravel
 }
 
 // --- FUNGSI BANTUAN UI AVATAR & ROLE ---
 const getInitials = (name: string) => {
-  return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 };
 
 const getAvatarColor = (name: string) => {
@@ -28,34 +43,39 @@ const getAvatarColor = (name: string) => {
     "bg-emerald-100 text-emerald-600",
     "bg-rose-100 text-rose-600",
   ];
-  const charCode = name.charCodeAt(0);
+  const charCode = name.charCodeAt(0) || 0;
   return colors[charCode % colors.length];
 };
 
-// PERBAIKAN: Fungsi dikonversi menjadi String() untuk menangani nilai TINYINT
 const getRoleName = (roleId: string | number) => {
   const roleStr = String(roleId);
   switch (roleStr) {
-    case "1": return "Dokter";
-    case "2": return "Perawat";
-    case "3": return "Ahli Gizi";
-    case "4": return "Apoteker";
-    case "5": return "Administrasi";
-    case "6": return "PIC Prolanis";
-    default: return "Tidak Diketahui";
+    case "1":
+      return "Super Admin";
+    case "2":
+      return "Manajemen RS";
+    case "3":
+      return "Komite K3 RS";
+    case "4":
+      return "Nakes / Staf";
+    default:
+      return "Tidak Diketahui";
   }
 };
 
 const getRoleBadgeColor = (roleId: string | number) => {
   const roleStr = String(roleId);
   switch (roleStr) {
-    case "1": return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/20 dark:text-blue-400";
-    case "2": return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400";
-    case "3": return "bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-500/20 dark:text-teal-400";
-    case "4": return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/20 dark:text-purple-400";
-    case "5": return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/20 dark:text-orange-400";
-    case "6": return "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-400";
-    default: return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
+    case "1":
+      return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/20 dark:text-blue-400";
+    case "2":
+      return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400";
+    case "3":
+      return "bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-500/20 dark:text-teal-400";
+    case "4":
+      return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/20 dark:text-purple-400";
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400";
   }
 };
 
@@ -64,26 +84,29 @@ export default function PenggunaComponent() {
 
   // --- STATES UTAMA ---
   const [dataList, setDataList] = useState<Inputan[]>([]);
+  const [unitList, setUnitList] = useState<UnitKerja[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Pagination & Search States (Logika Client-Side)
+  // Pagination & Search States
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   // --- STATE FORM & VALIDASI ---
   const [formData, setFormData] = useState({
-    userid: "",
-    name: "",
+    id_pengguna: "",
+    id_unit: "",
+    nama_lengkap: "",
     role: "",
-    email: "",
+    jenis_profesi: "",
+    masa_kerja: "",
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
-  // --- FETCH DATA (Sekali Panggil untuk Client-Side) ---
+  // --- FETCH DATA PENGGUNA & UNIT KERJA ---
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -97,22 +120,35 @@ export default function PenggunaComponent() {
     }
   };
 
+  const fetchUnitKerja = async () => {
+    try {
+      // Sesuaikan endpoint ini dengan route getUnitKerja di routes/api.php Anda
+      const response = await api.get("/unit-kerja");
+      setUnitList(response.data.data || response.data);
+    } catch (error) {
+      console.error("Gagal memuat daftar unit kerja:", error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchUnitKerja();
   }, []);
 
-  // --- RESET PAGE KETIKA PENCARIAN BERUBAH ---
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
 
   // --- LOGIKA PENCARIAN & PAGINATION (CLIENT-SIDE) ---
-  const filteredData = dataList.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.userid.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredData = dataList.filter((item) => {
+    const keyword = searchQuery.toLowerCase();
+    const namaUnit = item.relasi_ke_unit_kerja?.nama_unit?.toLowerCase() || "";
+    return (
+      item.nama_lengkap.toLowerCase().includes(keyword) ||
+      item.id_pengguna.toString().toLowerCase().includes(keyword) ||
+      namaUnit.includes(keyword)
+    );
+  });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -122,7 +158,9 @@ export default function PenggunaComponent() {
   );
 
   // --- FUNGSI HANDLE INPUT FORM ---
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -134,10 +172,12 @@ export default function PenggunaComponent() {
   const handleAdd = () => {
     setEditId(null);
     setFormData({
-      userid: "",
-      name: "",
+      id_pengguna: "",
+      id_unit: "",
+      nama_lengkap: "",
       role: "",
-      email: "",
+      jenis_profesi: "",
+      masa_kerja: "",
       password: "",
     });
     setErrors({});
@@ -147,11 +187,13 @@ export default function PenggunaComponent() {
   const handleEdit = (item: Inputan) => {
     setEditId(item.id);
     setFormData({
-      userid: item.userid,
-      name: item.name,
-      role: String(item.role), // PERBAIKAN: Paksa menjadi string agar form <select> terbaca
-      email: item.email,
-      password: "", // Jangan tampilkan password lama
+      id_pengguna: item.id_pengguna,
+      id_unit: String(item.id_unit),
+      nama_lengkap: item.nama_lengkap,
+      role: String(item.role),
+      jenis_profesi: item.jenis_profesi,
+      masa_kerja: item.masa_kerja,
+      password: "",
     });
     setErrors({});
     openModal();
@@ -159,7 +201,15 @@ export default function PenggunaComponent() {
 
   const handleCloseModal = () => {
     setEditId(null);
-    setFormData({ userid: "", name: "", role: "", email: "", password: "" });
+    setFormData({
+      id_pengguna: "",
+      id_unit: "",
+      nama_lengkap: "",
+      role: "",
+      jenis_profesi: "",
+      masa_kerja: "",
+      password: "",
+    });
     setErrors({});
     closeModal();
   };
@@ -190,7 +240,7 @@ export default function PenggunaComponent() {
         });
       }
       closeModal();
-      fetchData(); 
+      fetchData();
     } catch (error: any) {
       if (error.response && error.response.status === 422) {
         setErrors(error.response.data.errors);
@@ -226,7 +276,11 @@ export default function PenggunaComponent() {
           });
           fetchData();
         } catch (error) {
-          Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data.", "error");
+          Swal.fire(
+            "Gagal!",
+            "Terjadi kesalahan saat menghapus data.",
+            "error"
+          );
         }
       }
     });
@@ -241,18 +295,30 @@ export default function PenggunaComponent() {
             Manajemen Pengguna
           </h2>
           <p className="text-sm text-gray-500 mt-1">
-            Kelola akses staf medis dan administrasi ke dalam sistem.
+            Kelola akses tenaga kesehatan, komite K3RS, dan manajemen ke dalam sistem.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative w-full sm:w-64 group">
+          <div className="relative w-full sm:w-72 group">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
             </span>
             <input
               type="text"
-              placeholder="Cari nama, ID, atau email..."
+              placeholder="Cari nama, ID, atau unit kerja..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-full border border-gray-200 bg-gray-50/50 py-2.5 pl-11 pr-4 text-sm font-medium text-gray-700 transition-all focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
@@ -274,7 +340,8 @@ export default function PenggunaComponent() {
             <thead className="bg-gray-50/80 border-b border-gray-100 text-gray-600 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-300">
               <tr>
                 <th className="px-6 py-4 font-semibold">Profil Pengguna</th>
-                <th className="px-6 py-4 font-semibold">ID Identitas</th>
+                <th className="px-6 py-4 font-semibold">ID Pengguna</th>
+                <th className="px-6 py-4 font-semibold">Unit Kerja</th>
                 <th className="px-6 py-4 font-semibold">Hak Akses (Role)</th>
                 <th className="px-6 py-4 font-semibold text-right">Aksi</th>
               </tr>
@@ -282,48 +349,100 @@ export default function PenggunaComponent() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-16 text-center">
+                  <td colSpan={5} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
-                      <svg className="w-8 h-8 text-brand-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                      <p className="text-gray-500 font-medium">Memuat data pengguna...</p>
+                      <svg
+                        className="w-8 h-8 text-brand-500 animate-spin"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <p className="text-gray-500 font-medium">
+                        Memuat data pengguna...
+                      </p>
                     </div>
                   </td>
                 </tr>
               ) : paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-16 text-center">
+                  <td colSpan={5} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center">
                       <span className="text-4xl mb-3">👥</span>
-                      <p className="text-gray-600 font-medium">Pengguna Kosong</p>
-                      <p className="text-gray-400 text-sm mt-1">Tidak ada data pengguna yang sesuai dengan pencarian Anda.</p>
+                      <p className="text-gray-600 font-medium">
+                        Pengguna Kosong
+                      </p>
+                      <p className="text-gray-400 text-sm mt-1">
+                        Tidak ada data pengguna yang sesuai dengan pencarian Anda.
+                      </p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 paginatedData.map((item) => (
-                  <tr key={item.id} className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
-                    
+                  <tr
+                    key={item.id}
+                    className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold shadow-sm ${getAvatarColor(item.name)}`}>
-                          {getInitials(item.name)}
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold shadow-sm ${getAvatarColor(item.nama_lengkap)}`}
+                        >
+                          {getInitials(item.nama_lengkap)}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900 dark:text-white text-base">{item.name}</p>
+                          <p className="font-bold text-gray-900 dark:text-white text-base">
+                            {item.nama_lengkap}
+                          </p>
                           <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                            {item.email}
+                            <span>{item.jenis_profesi}</span>
+                            <span>•</span>
+                            <span>Masa kerja: {item.masa_kerja}</span>
                           </p>
                         </div>
                       </div>
                     </td>
 
                     <td className="px-6 py-4 font-mono text-gray-600 dark:text-gray-400">
-                      {item.userid}
+                      {item.id_pengguna}
+                    </td>
+
+                    {/* MENAMPILKAN NAMA UNIT DARI RELASI */}
+                    <td className="px-6 py-4">
+                      {item.relasi_ke_unit_kerja ? (
+                        <div>
+                          <p className="font-semibold text-gray-800 dark:text-gray-200">
+                            {item.relasi_ke_unit_kerja.nama_unit}
+                          </p>
+                          <p className="text-xs text-gray-400 font-mono">
+                            {item.relasi_ke_unit_kerja.kode_unit}
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-xs italic text-gray-400">
+                          Unit tidak ditemukan (ID: {item.id_unit})
+                        </span>
+                      )}
                     </td>
 
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider border ${getRoleBadgeColor(item.role)}`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider border ${getRoleBadgeColor(item.role)}`}
+                      >
                         {getRoleName(item.role)}
                       </span>
                     </td>
@@ -335,14 +454,38 @@ export default function PenggunaComponent() {
                           className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors dark:hover:bg-gray-800"
                           title="Edit Pengguna"
                         >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
                         </button>
                         <button
-                          onClick={() => handleDelete(item.id, item.name)}
+                          onClick={() => handleDelete(item.id, item.nama_lengkap)}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors dark:hover:bg-gray-800"
                           title="Hapus Pengguna"
                         >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
                         </button>
                       </div>
                     </td>
@@ -357,7 +500,19 @@ export default function PenggunaComponent() {
         {!loading && filteredData.length > 0 && (
           <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/50 px-6 py-4 dark:border-gray-800 dark:bg-gray-900/50">
             <div className="text-sm text-gray-500 font-medium">
-              Menampilkan <span className="font-bold text-gray-900 dark:text-white">{startIndex + 1}</span> - <span className="font-bold text-gray-900 dark:text-white">{Math.min(startIndex + itemsPerPage, filteredData.length)}</span> dari <span className="font-bold text-gray-900 dark:text-white">{filteredData.length}</span> pengguna
+              Menampilkan{" "}
+              <span className="font-bold text-gray-900 dark:text-white">
+                {startIndex + 1}
+              </span>{" "}
+              -{" "}
+              <span className="font-bold text-gray-900 dark:text-white">
+                {Math.min(startIndex + itemsPerPage, filteredData.length)}
+              </span>{" "}
+              dari{" "}
+              <span className="font-bold text-gray-900 dark:text-white">
+                {filteredData.length}
+              </span>{" "}
+              pengguna
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -368,7 +523,9 @@ export default function PenggunaComponent() {
                 &larr; Prev
               </button>
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-brand-600 disabled:opacity-50 disabled:hover:text-gray-700 shadow-sm transition-all dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
               >
@@ -379,36 +536,43 @@ export default function PenggunaComponent() {
         )}
       </div>
 
-      {/* --- MODAL FORM DENGAN SPLIT LAYOUT (ANTI TERPOTONG) --- */}
+      {/* --- MODAL FORM --- */}
       <Modal
         isOpen={isOpen}
         onClose={handleCloseModal}
         className="max-w-4xl p-0 bg-transparent shadow-none border-none"
       >
         <div className="w-full rounded-3xl bg-white shadow-2xl dark:bg-gray-900 flex flex-col md:flex-row h-auto md:max-h-[90vh] overflow-hidden">
-          
           {/* Panel Kiri: Info/Guide */}
           <div className="hidden md:block w-1/3 bg-gradient-to-br from-brand-600 to-brand-800 p-8 text-white relative shrink-0">
-            <div className="absolute top-0 right-0 opacity-10">
-              <svg width="150" height="150" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            </div>
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
-                <h3 className="text-2xl font-black mb-2">{editId ? "Ubah Akses" : "Registrasi"} Staf</h3>
+                <h3 className="text-2xl font-black mb-2">
+                  {editId ? "Ubah Akses" : "Registrasi"} Pengguna
+                </h3>
                 <p className="text-brand-100 text-sm leading-relaxed">
-                  Pembuatan akun staf memastikan setiap tenaga medis dan admin dapat mengakses modul yang sesuai dengan tugasnya.
+                  Penetapan unit kerja dan hak akses memastikan pelaporan serta
+                  prediksi risiko K3RS berjalan akurat sesuai instalasi.
                 </p>
               </div>
-              
+
               <div className="space-y-4 text-sm bg-black/20 p-4 rounded-xl backdrop-blur-sm border border-white/10 mt-8">
-                <h4 className="font-bold text-white mb-2">Panduan Hak Akses:</h4>
+                <h4 className="font-bold text-white mb-2">
+                  Panduan Hak Akses:
+                </h4>
                 <div className="flex gap-2 items-start text-brand-50">
-                  <span className="mt-0.5">🩺</span>
-                  <p><strong>Perawat/Dokter:</strong> Mengakses antrean pemeriksaan dan TTV.</p>
+                  <span className="mt-0.5">🛡️</span>
+                  <p>
+                    <strong>Komite K3RS:</strong> Pemantauan lintas unit &amp;
+                    tindak lanjut mitigasi.
+                  </p>
                 </div>
                 <div className="flex gap-2 items-start text-brand-50">
-                  <span className="mt-0.5">🥗</span>
-                  <p><strong>Gizi:</strong> Mengakses modul Rekomendasi Menu.</p>
+                  <span className="mt-0.5">🏥</span>
+                  <p>
+                    <strong>Nakes / Staf:</strong> Input kondisi bahaya dan
+                    evaluasi risiko pada unit kerja.
+                  </p>
                 </div>
               </div>
             </div>
@@ -416,54 +580,109 @@ export default function PenggunaComponent() {
 
           {/* Panel Kanan: Form */}
           <div className="w-full md:w-2/3 flex flex-col h-full bg-gray-50/30 dark:bg-transparent max-h-[90vh]">
-            
-            {/* Modal Header Terkunci */}
             <div className="shrink-0 flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <h3 className="text-xl font-bold text-gray-800 dark:text-white/90 md:hidden">
                 {editId ? "Edit Pengguna" : "Tambah Pengguna"}
               </h3>
               <h3 className="hidden md:block text-lg font-bold text-gray-400 uppercase tracking-widest">
-                Kredensial Akun
+                Kredensial &amp; Profil Unit
               </h3>
-              <button onClick={handleCloseModal} className="rounded-full p-2 text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors dark:hover:bg-gray-700">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <button
+                onClick={handleCloseModal}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-colors dark:hover:bg-gray-700"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            {/* Modal Body Bisa di-Scroll */}
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-              <form id="penggunaForm" onSubmit={handleSave} className="space-y-5">
-                
+              <form
+                id="penggunaForm"
+                onSubmit={handleSave}
+                className="space-y-5"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">ID Identitas (NIP/NIK) <span className="text-red-500">*</span></label>
+                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                      ID Pengguna (NIP / Kode){" "}
+                      <span className="text-red-500">*</span>
+                    </label>
                     <input
-                      name="userid"
-                      type="number"
-                      value={formData.userid}
-                      onChange={handleInputChange}
-                      className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.userid ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
-                      placeholder="Masukkan Angka ID"
-                    />
-                    {errors.userid && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.userid[0]}</p>}
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">Nama Lengkap <span className="text-red-500">*</span></label>
-                    <input
-                      name="name"
+                      name="id_pengguna"
                       type="text"
-                      value={formData.name}
+                      value={formData.id_pengguna}
                       onChange={handleInputChange}
-                      className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.name ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
-                      placeholder="Nama Staf"
+                      className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.id_pengguna ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
+                      placeholder="Contoh: IGD-001"
                     />
-                    {errors.name && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.name[0]}</p>}
+                    {errors.id_pengguna && (
+                      <p className="mt-1.5 text-xs font-semibold text-red-500">
+                        {errors.id_pengguna[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                      Nama Lengkap <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      name="nama_lengkap"
+                      type="text"
+                      value={formData.nama_lengkap}
+                      onChange={handleInputChange}
+                      className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.nama_lengkap ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
+                      placeholder="Nama Lengkap beserta gelar"
+                    />
+                    {errors.nama_lengkap && (
+                      <p className="mt-1.5 text-xs font-semibold text-red-500">
+                        {errors.nama_lengkap[0]}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">Role / Hak Akses <span className="text-red-500">*</span></label>
+                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                      Unit Kerja <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="id_unit"
+                      value={formData.id_unit}
+                      onChange={handleInputChange}
+                      className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.id_unit ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
+                    >
+                      <option value="">Pilih Unit Kerja...</option>
+                      {unitList.map((unit) => (
+                        <option key={unit.id} value={unit.id}>
+                          {unit.nama_unit} ({unit.kode_unit})
+                        </option>
+                      ))}
+                    </select>
+                    {errors.id_unit && (
+                      <p className="mt-1.5 text-xs font-semibold text-red-500">
+                        {errors.id_unit[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                      Role / Hak Akses <span className="text-red-500">*</span>
+                    </label>
                     <select
                       name="role"
                       value={formData.role}
@@ -471,57 +690,119 @@ export default function PenggunaComponent() {
                       className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.role ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
                     >
                       <option value="">Pilih Role...</option>
-                      <option value="1">Dokter</option>
-                      <option value="2">Perawat</option>
-                      <option value="3">Gizi</option>
-                      <option value="4">Apoteker</option>
-                      <option value="5">Administrasi</option>
-                      <option value="6">PIC Prolanis</option>
+                      <option value="1">Super Admin</option>
+                      <option value="2">Manajemen RS</option>
+                      <option value="3">Komite K3 RS</option>
+                      <option value="4">Nakes / Staf</option>
                     </select>
-                    {errors.role && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.role[0]}</p>}
+                    {errors.role && (
+                      <p className="mt-1.5 text-xs font-semibold text-red-500">
+                        {errors.role[0]}
+                      </p>
+                    )}
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">Alamat Email <span className="text-red-500">*</span></label>
-                    <input
-                      name="email"
-                      type="email"
-                      value={formData.email}
+                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                      Jenis Profesi <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="jenis_profesi"
+                      value={formData.jenis_profesi}
                       onChange={handleInputChange}
-                      disabled={editId !== null}
-                      className={`mt-1.5 w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:border-gray-700 dark:text-white ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500/10 bg-white dark:bg-gray-800" : editId !== null ? "bg-gray-100 border-gray-200 cursor-not-allowed dark:bg-gray-800/50" : "bg-white border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:bg-gray-800"}`}
-                      placeholder="staf@klinik.com"
-                    />
-                    {editId !== null && <p className="mt-1.5 text-[11px] font-medium text-amber-600 dark:text-amber-500">Email digunakan untuk login (tidak dapat diubah).</p>}
-                    {errors.email && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.email[0]}</p>}
+                      className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.jenis_profesi ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
+                    >
+                      <option value="">Pilih Profesi...</option>
+                      <option value="Dokter">Dokter</option>
+                      <option value="Perawat">Perawat</option>
+                      <option value="Bidan">Bidan</option>
+                      <option value="Analis Kesehatan">Analis Kesehatan</option>
+                      <option value="Apoteker/TTK">Apoteker/TTK</option>
+                      <option value="Radiografer">Radiografer</option>
+                      <option value="Tenaga K3">Tenaga K3</option>
+                      <option value="Non-Kesehatan">Non-Kesehatan</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
+                    {errors.jenis_profesi && (
+                      <p className="mt-1.5 text-xs font-semibold text-red-500">
+                        {errors.jenis_profesi[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                      Masa Kerja <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="masa_kerja"
+                      value={formData.masa_kerja}
+                      onChange={handleInputChange}
+                      className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.masa_kerja ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
+                    >
+                      <option value="">Pilih Masa Kerja...</option>
+                      <option value="< 1 tahun">&lt; 1 tahun</option>
+                      <option value="1-5 tahun">1-5 tahun</option>
+                      <option value="6-10 tahun">6-10 tahun</option>
+                      <option value="> 10 tahun">&gt; 10 tahun</option>
+                    </select>
+                    {errors.masa_kerja && (
+                      <p className="mt-1.5 text-xs font-semibold text-red-500">
+                        {errors.masa_kerja[0]}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">Password {editId === null && <span className="text-red-500">*</span>}</label>
+                  <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                    Password{" "}
+                    {editId === null && <span className="text-red-500">*</span>}
+                  </label>
                   <input
                     name="password"
                     type="password"
                     value={formData.password}
                     onChange={handleInputChange}
                     className={`mt-1.5 w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-4 transition-all dark:bg-gray-800 dark:text-white ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500/10" : "border-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-gray-700"}`}
-                    placeholder={editId ? "Kosongkan jika tidak ingin mengubah password" : "Minimal 8 karakter"}
+                    placeholder={
+                      editId
+                        ? "Kosongkan jika tidak ingin mengubah password"
+                        : "Min. 8 karakter (Huruf besar, kecil, angka, simbol)"
+                    }
                   />
-                  {errors.password && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.password[0]}</p>}
+                  {errors.password && (
+                    <p className="mt-1.5 text-xs font-semibold text-red-500">
+                      {errors.password[0]}
+                    </p>
+                  )}
                 </div>
-
               </form>
             </div>
 
-            {/* Modal Footer Terkunci */}
             <div className="shrink-0 flex items-center justify-end gap-3 p-6 border-t border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900 mt-auto">
-              <button type="button" onClick={handleCloseModal} className="rounded-xl border border-gray-300 px-6 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="rounded-xl border border-gray-300 px-6 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
                 Batal
               </button>
-              <button type="submit" form="penggunaForm" disabled={isSaving} className="rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-bold text-white hover:bg-brand-700 transition-all shadow-md shadow-brand-500/20 active:scale-95 disabled:opacity-50">
-                {isSaving ? "Menyimpan..." : editId ? "Simpan Perubahan" : "Simpan Pengguna"}
+              <button
+                type="submit"
+                form="penggunaForm"
+                disabled={isSaving}
+                className="rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-bold text-white hover:bg-brand-700 transition-all shadow-md shadow-brand-500/20 active:scale-95 disabled:opacity-50"
+              >
+                {isSaving
+                  ? "Menyimpan..."
+                  : editId
+                    ? "Simpan Perubahan"
+                    : "Simpan Pengguna"}
               </button>
             </div>
-
           </div>
         </div>
       </Modal>

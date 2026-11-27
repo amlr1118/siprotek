@@ -38,7 +38,7 @@ export default function App() {
             <Route
               path="/data-pengguna"
               element={
-                <PrivateRoute allowedRoles={[6]}>
+                <PrivateRoute allowedRoles={[6,1]}>
                   <PenggunaComponent />
                 </PrivateRoute>
               }

@@ -40,9 +40,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     Route::post('/logout', [LoginController::class, 'logout']);
 
-    Route::middleware('role:6')->group(function () {
+    Route::middleware('role:1')->group(function () {
         //Hanya bisa di akses PIC Prolanis
         Route::get('/pengguna', [LoginController::class, 'index']);
+        Route::get('/unit-kerja', [LoginController::class, 'getUnitKerja']);
         Route::put('/update-pengguna/{id}', [LoginController::class, 'updateDataPengguna']);
         Route::delete('/hapus-pengguna/{id}', [LoginController::class, 'hapusDataPengguna']);
         Route::post('/register', [LoginController::class, 'register']);

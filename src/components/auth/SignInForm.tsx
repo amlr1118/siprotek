@@ -30,7 +30,7 @@ export default function SignInForm() {
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
-    email: "",
+    id_pengguna: "",
     password: "",
   });
 
@@ -67,7 +67,7 @@ export default function SignInForm() {
           Swal.fire({
             icon: "error",
             title: "Akses Ditolak",
-            text: error.response.data.message || "Email atau kata sandi yang Anda masukkan salah!",
+            text: error.response.data.message || "ID Pengguna atau kata sandi yang Anda masukkan salah!",
             confirmButtonColor: "#ef4444",
             customClass: {
               popup: 'rounded-2xl'
@@ -122,21 +122,21 @@ export default function SignInForm() {
             <div className="space-y-6">
               <div>
                 <Label>
-                  Email <span className="text-error-500">*</span>
+                  ID Pengguna <span className="text-error-500">*</span>
                 </Label>
                 <Input
-                  id="email"
-                  name="email"
-                  value={formData.email}
+                  id="id_pengguna"
+                  name="id_pengguna"
+                  value={formData.id_pengguna}
                   onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+                    setFormData({ ...formData, id_pengguna: e.target.value })
                   }
                   placeholder="admin@prolanis.com"
-                  className={`w-full ${errors.email ? 'border-error-500 focus:border-error-500 focus:ring-error-500/20' : ''}`}
+                  className={`w-full ${errors.id_pengguna ? 'border-error-500 focus:border-error-500 focus:ring-error-500/20' : ''}`}
                 />
-                {errors.email && (
+                {errors.id_pengguna && (
                   <span className="block mt-1.5 text-xs font-medium text-error-500">
-                    {errors.email[0]}
+                    {errors.id_pengguna[0]}
                   </span>
                 )}
               </div>

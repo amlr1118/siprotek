@@ -52,7 +52,7 @@ export default function UserDropdown() {
   };
 
   // Ambil nama depan (Pastikan fallback aman jika user null)
-  const firstName = user?.name?.split(" ")[0] || "User";
+  const firstName = user?.nama_lengkap?.split(" ")[0] || "User";
   const userAvatar = (user as any)?.avatar || "/images/user/no-user.jpg";
 
   return (
@@ -95,10 +95,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {user?.name || "Loading..."}
+            {user?.nama_lengkap || "Loading..."}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {user?.email || "..."}
+            {user?.id_pengguna || "..."}
           </span>
         </div>
 

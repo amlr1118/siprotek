@@ -99,7 +99,7 @@ const AppSidebar: React.FC = () => {
             name: "Data Pengguna",
             path: "/data-pengguna",
             pro: false,
-            allowedRoles: [6], // Hanya PIC (6)
+            allowedRoles: [6,1], // Hanya PIC (6)
           },
           {
             name: "Peserta Prolanis",
@@ -122,25 +122,25 @@ const AppSidebar: React.FC = () => {
         ],
       },
       // Menu Pemeriksaan telah Dihapus Total
-      {
-        icon: <ListIcon />,
-        name: "Arsip",
-        subItems: [
-          {
-            name: "Arsip Kegiatan",
-            path: "/arsip-kegiatan",
-            pro: false,
-            allowedRoles: [5, 6],
-          },
+      // {
+      //   icon: <ListIcon />,
+      //   name: "Arsip",
+      //   subItems: [
+      //     {
+      //       name: "Arsip Kegiatan",
+      //       path: "/arsip-kegiatan",
+      //       pro: false,
+      //       allowedRoles: [5, 6],
+      //     },
 
-          {
-            name: "Arsip Pemerikasaan",
-            path: "/arsip-pemeriksaan",
-            pro: false,
-            allowedRoles: [1,2,3,6], 
-          },
-        ],
-      },
+      //     {
+      //       name: "Arsip Pemerikasaan",
+      //       path: "/arsip-pemeriksaan",
+      //       pro: false,
+      //       allowedRoles: [1,2,3,6], 
+      //     },
+      //   ],
+      // },
     ];
   }, [user]); // Menu akan di-render ulang jika data user berubah
 

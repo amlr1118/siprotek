@@ -33,11 +33,11 @@ export default function Home() {
 
         {/* WIDGET 2: Absensi Peserta Prolanis */}
         {/* Contoh: Hanya tampil untuk Dokter (1) dan Perawat (2) */}
-        {hasAccess([5]) && (
+        {/* {hasAccess([5]) && (
           <div className="col-span-12">
             <AbsemPesrtaProlanis />
           </div>
-        )}
+        )} */}
 
         {/* {hasAccess([2]) && (
           <div className="col-span-12 space-y-6 xl:col-span-7">
@@ -47,33 +47,33 @@ export default function Home() {
 
         {hasAccess([2]) && (
           <div className="col-span-12">
-            <PemeriksaanComponent />
+            {/* <PemeriksaanComponent /> */}
           </div>
         )}
 
         {hasAccess([1]) && (
           <div className="col-span-12">
-            <PemeriksaanDokterComponent />
+            {/* <PemeriksaanDokterComponent /> */}
           </div>
         )}
 
         {hasAccess([3]) && (
           <div className="col-span-12">
-            <EdukasiGiziComponent />
+            {/* <EdukasiGiziComponent /> */}
           </div>
         )}
 
         {hasAccess([4]) && (
           <div className="col-span-12">
-            <ApotekComponent />
+            {/* <ApotekComponent /> */}
           </div>
         )}
 
-        {hasAccess([6]) && (
+        {/* {hasAccess([6]) && (
           <div className="col-span-12">
             <DashboardAdmin />
           </div>
-        )}
+        )} */}
       </div>
     </>
   );

@@ -17,10 +17,12 @@ class DatabaseSeeder extends Seeder
         // PesertaProlanisModel::factory(50)->create();
 
         $this->call([
-            PenggunaSeeder::class,
-            PesertaProlanisSeeder::class,
-            RiwayatPemeriksaanSeeder::class,
-            DataPanganLokalSeeder::class,
+            // PenggunaSeeder::class,
+            // PesertaProlanisSeeder::class,
+            // RiwayatPemeriksaanSeeder::class,
+            // DataPanganLokalSeeder::class,
+
+            UnitKerjaSeeder::class,
         ]);
     }
 
