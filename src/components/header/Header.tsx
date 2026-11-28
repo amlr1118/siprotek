@@ -3,24 +3,90 @@ import { ThemeToggleButton } from "../common/ThemeToggleButton";
 import UserDropdown from "./UserDropdown";
 import { Link } from "react-router-dom";
 
-// --- KOMPONEN LOGO SMART-PROLANIS UNTUK MOBILE ---
-const SmartProlanisLogoMobile = () => (
-  <div className="flex items-center gap-2">
-    <div className="flex items-center justify-center w-8 h-8 bg-brand-500 rounded-lg shadow-md flex-shrink-0">
-      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+// --- KOMPONEN LOGO SIPROTEK UNTUK MOBILE / HEADER ---
+const SiprotekLogoMobile = () => (
+  <div className="flex items-center gap-2.5">
+    <div className="flex items-center justify-center w-9 h-9 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-1 flex-shrink-0">
+      <svg
+        viewBox="0 0 200 220"
+        className="w-full h-full"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <clipPath id="siprotek-shield-clip-header">
+            <path d="M100 10 L176 34 V104 C176 156 142 192 100 210 C58 192 24 156 24 104 V34 L100 10 Z" />
+          </clipPath>
+        </defs>
+
+        {/* Perisai Hijau K3 */}
+        <path
+          d="M100 10 L176 34 V104 C176 156 142 192 100 210 C58 192 24 156 24 104 V34 L100 10 Z"
+          fill="#378E43"
+        />
+
+        {/* Palang Medis Putih */}
+        <path
+          d="M86 42 H114 V68 H140 V96 H114 V122 H86 V96 H60 V68 H86 V42 Z"
+          fill="#FFFFFF"
+        />
+
+        {/* Roda Gigi Putih */}
+        <g clipPath="url(#siprotek-shield-clip-header)">
+          <g fill="#FFFFFF">
+            <rect x="91" y="132" width="18" height="22" rx="3" />
+            <rect
+              x="91"
+              y="132"
+              width="18"
+              height="22"
+              rx="3"
+              transform="rotate(36 100 182)"
+            />
+            <rect
+              x="91"
+              y="132"
+              width="18"
+              height="22"
+              rx="3"
+              transform="rotate(72 100 182)"
+            />
+            <rect
+              x="91"
+              y="132"
+              width="18"
+              height="22"
+              rx="3"
+              transform="rotate(-36 100 182)"
+            />
+            <rect
+              x="91"
+              y="132"
+              width="18"
+              height="22"
+              rx="3"
+              transform="rotate(-72 100 182)"
+            />
+          </g>
+          <circle cx="100" cy="182" r="40" fill="#FFFFFF" />
+          <circle cx="100" cy="182" r="21" fill="#378E43" />
+        </g>
       </svg>
     </div>
     <div className="flex flex-col text-left">
-      <span className="text-[1.1rem] font-black leading-none text-gray-800 dark:text-white tracking-tight">Smart</span>
-      <span className="text-[0.55rem] font-bold tracking-[0.2em] text-brand-500 dark:text-brand-400">PROLANIS</span>
+      <span className="text-[1.1rem] font-black leading-none text-gray-800 dark:text-white tracking-wider">
+        SIPROTEK
+      </span>
+      <span className="text-[0.55rem] font-bold uppercase tracking-[0.18em] text-[#378E43] dark:text-emerald-400 mt-0.5">
+        K3RS RSUD Busel
+      </span>
     </div>
   </div>
 );
 
 // Define the interface for the props
 interface HeaderProps {
-  onClick?: () => void; 
+  onClick?: () => void;
   onToggle: () => void;
 }
 
@@ -35,14 +101,13 @@ const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-40 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
-          
           <button
             className="block w-10 h-10 text-gray-500 lg:hidden dark:text-gray-400"
             onClick={onToggle}
           >
             {/* Hamburger Icon */}
             <svg
-              className={`block`}
+              className="block"
               width="16"
               height="12"
               viewBox="0 0 16 12"
@@ -53,21 +118,6 @@ const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
                 fillRule="evenodd"
                 clipRule="evenodd"
                 d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 10.5858 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z"
-                fill="currentColor"
-              />
-            </svg>
-            <svg
-              className="hidden"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
                 fill="currentColor"
               />
             </svg>
@@ -95,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
           </button>
 
           <Link to="/" className="lg:hidden ml-2 outline-none">
-            <SmartProlanisLogoMobile />
+            <SiprotekLogoMobile />
           </Link>
 
           <button
@@ -140,7 +190,7 @@ const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
                 </button>
                 <input
                   type="text"
-                  placeholder="Cari data pasien..."
+                  placeholder="Cari aturan K3, unit kerja, atau penilaian..."
                   className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
                 />
 

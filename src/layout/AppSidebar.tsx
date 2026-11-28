@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-// Assume these icons are imported from an icon library
-import {
-  ChevronDownIcon,
-  GridIcon,
-  HorizontaLDots,
-  TableIcon,
-  ListIcon,
-} from "../icons";
+import { ChevronDownIcon, GridIcon, HorizontaLDots, TableIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
 
@@ -27,50 +20,96 @@ type NavItem = {
   }[];
 };
 
-// --- KOMPONEN LOGO SMART-PROLANIS ---
-const SmartProlanisLogoFull = () => (
-  <div className="flex items-center gap-2">
-    <div className="flex items-center justify-center w-9 h-9 bg-brand-500 rounded-lg shadow-md flex-shrink-0">
-      <svg
-        className="w-5 h-5 text-white"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+// --- IKON SVG PERISAI K3 SIPROTEK ---
+const SiprotekShieldSvg = ({ clipId }: { clipId: string }) => (
+  <svg
+    viewBox="0 0 200 220"
+    className="w-full h-full"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <clipPath id={clipId}>
+        <path d="M100 10 L176 34 V104 C176 156 142 192 100 210 C58 192 24 156 24 104 V34 L100 10 Z" />
+      </clipPath>
+    </defs>
+
+    {/* Perisai Hijau K3 */}
+    <path
+      d="M100 10 L176 34 V104 C176 156 142 192 100 210 C58 192 24 156 24 104 V34 L100 10 Z"
+      fill="#378E43"
+    />
+
+    {/* Palang Medis Putih */}
+    <path
+      d="M86 42 H114 V68 H140 V96 H114 V122 H86 V96 H60 V68 H86 V42 Z"
+      fill="#FFFFFF"
+    />
+
+    {/* Roda Gigi Putih */}
+    <g clipPath={`url(#${clipId})`}>
+      <g fill="#FFFFFF">
+        <rect x="91" y="132" width="18" height="22" rx="3" />
+        <rect
+          x="91"
+          y="132"
+          width="18"
+          height="22"
+          rx="3"
+          transform="rotate(36 100 182)"
         />
-      </svg>
+        <rect
+          x="91"
+          y="132"
+          width="18"
+          height="22"
+          rx="3"
+          transform="rotate(72 100 182)"
+        />
+        <rect
+          x="91"
+          y="132"
+          width="18"
+          height="22"
+          rx="3"
+          transform="rotate(-36 100 182)"
+        />
+        <rect
+          x="91"
+          y="132"
+          width="18"
+          height="22"
+          rx="3"
+          transform="rotate(-72 100 182)"
+        />
+      </g>
+      <circle cx="100" cy="182" r="40" fill="#FFFFFF" />
+      <circle cx="100" cy="182" r="21" fill="#378E43" />
+    </g>
+  </svg>
+);
+
+// --- KOMPONEN LOGO SIPROTEK FULL (SIDEBAR TERBUKA) ---
+const SiprotekLogoFull = () => (
+  <div className="flex items-center gap-2.5">
+    <div className="flex items-center justify-center w-10 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-1 flex-shrink-0">
+      <SiprotekShieldSvg clipId="siprotek-sidebar-full-clip" />
     </div>
     <div className="flex flex-col text-left">
-      <span className="text-[1.15rem] font-black leading-none text-gray-800 dark:text-white tracking-tight">
-        Smart
+      <span className="text-[1.15rem] font-black leading-none text-gray-800 dark:text-white tracking-wider">
+        SIPROTEK
       </span>
-      <span className="text-[0.6rem] font-bold tracking-[0.2em] text-brand-500 dark:text-brand-400">
-        PROLANIS
+      <span className="text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[#378E43] dark:text-emerald-400 mt-1">
+        K3RS RSUD Busel
       </span>
     </div>
   </div>
 );
 
-const SmartProlanisLogoIcon = () => (
-  <div className="flex items-center justify-center w-8 h-8 bg-brand-500 rounded-lg shadow-md flex-shrink-0 transition-all duration-300">
-    <svg
-      className="w-4 h-4 text-white"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-      />
-    </svg>
+// --- KOMPONEN LOGO SIPROTEK ICON (SIDEBAR TERTUTUP / COLLAPSED) ---
+const SiprotekLogoIcon = () => (
+  <div className="flex items-center justify-center w-9 h-9 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-1 flex-shrink-0 transition-all duration-300">
+    <SiprotekShieldSvg clipId="siprotek-sidebar-icon-clip" />
   </div>
 );
 
@@ -97,19 +136,17 @@ const AppSidebar: React.FC = () => {
   const hasAccess = (allowedRoles?: number[]) => {
     if (!allowedRoles) return true;
     if (!user) return false;
-    if (user.role === 6) return true; // PIC otomatis akses semua
+    if (user.role === 6) return true;
     return allowedRoles.includes(user.role);
   };
 
-  // KITA BUAT MENU DINAMIS BERDASARKAN USER YANG LOGIN
+  // MENU DINAMIS BERDASARKAN USER YANG LOGIN
   const navItems: NavItem[] = useMemo(() => {
-    // Tentukan nama dashboard berdasarkan role
     let dashboardName = "Dashboard Utama";
-    if (user?.role === 2) dashboardName = "Dashboard Perawat";
-    // Anda bisa tambahkan kondisi lain kelak, contoh:
-    else if (user?.role === 1) dashboardName = "Dashboard";
-    else if (user?.role === 3) dashboardName = "Dashboard Ahli Gizi";
-    else if (user?.role === 4) dashboardName = "Dashboard Apoteker";
+    if (user?.role === 1) dashboardName = "Dashboard Super Admin";
+    else if (user?.role === 2) dashboardName = "Dashboard Manajemen RS";
+    else if (user?.role === 3) dashboardName = "Dashboard Komite K3RS";
+    else if (user?.role === 4) dashboardName = "Dashboard Nakes & Staf";
 
     return [
       {
@@ -125,13 +162,13 @@ const AppSidebar: React.FC = () => {
             name: "Pengguna",
             path: "/data-pengguna",
             pro: false,
-            allowedRoles: [6, 1], // Hanya PIC (6)
+            allowedRoles: [6, 1],
           },
           {
             name: "Unit Kerja",
             path: "/unit-kerja",
             pro: false,
-            allowedRoles: [1], 
+            allowedRoles: [1],
           },
           {
             name: "Dimensi Bahaya",
@@ -143,46 +180,24 @@ const AppSidebar: React.FC = () => {
             name: "Kategori Resiko",
             path: "/kategori-resiko",
             pro: false,
-            allowedRoles: [1], 
+            allowedRoles: [1],
           },
-
           {
             name: "Hierarki Niosh",
             path: "/hierarki-niosh",
             pro: false,
-            allowedRoles: [1], 
+            allowedRoles: [1],
           },
-
           {
             name: "Aturan K3",
             path: "/aturan-k3",
             pro: false,
-            allowedRoles: [1], 
+            allowedRoles: [1],
           },
         ],
       },
-      // Menu Pemeriksaan telah Dihapus Total
-      // {
-      //   icon: <ListIcon />,
-      //   name: "Arsip",
-      //   subItems: [
-      //     {
-      //       name: "Arsip Kegiatan",
-      //       path: "/arsip-kegiatan",
-      //       pro: false,
-      //       allowedRoles: [5, 6],
-      //     },
-
-      //     {
-      //       name: "Arsip Pemerikasaan",
-      //       path: "/arsip-pemeriksaan",
-      //       pro: false,
-      //       allowedRoles: [1,2,3,6],
-      //     },
-      //   ],
-      // },
     ];
-  }, [user]); // Menu akan di-render ulang jika data user berubah
+  }, [user]);
 
   const othersItems: NavItem[] = [];
 
@@ -380,9 +395,9 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/" className="outline-none">
           {isExpanded || isHovered || isMobileOpen ? (
-            <SmartProlanisLogoFull />
+            <SiprotekLogoFull />
           ) : (
-            <SmartProlanisLogoIcon />
+            <SiprotekLogoIcon />
           )}
         </Link>
       </div>

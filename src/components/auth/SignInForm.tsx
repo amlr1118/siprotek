@@ -99,8 +99,8 @@ export default function SignInForm() {
   return (
     <>
       <PageMeta
-        title="Login | Smart-PROLANIS"
-        description="Halaman masuk ke sistem Smart-PROLANIS"
+        title="Login | SIPROTEK"
+        description="Halaman masuk ke sistem SIPROTEK"
       />
 
       <div className="flex flex-col flex-1 w-full lg:w-1/2 p-6 sm:p-12">
