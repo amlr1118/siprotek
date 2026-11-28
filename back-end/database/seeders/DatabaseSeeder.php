@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             // DataPanganLokalSeeder::class,
 
             UnitKerjaSeeder::class,
+            DimensiBahayaSeeder::class,
+            KategoriResikoSeeder::class,
+            HierarkiNioshSeeder::class,
         ]);
     }
 

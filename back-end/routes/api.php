@@ -4,12 +4,17 @@ use App\Http\Controllers\AbsenController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ApotekController;
 use App\Http\Controllers\ArsipKegiatanController;
+use App\Http\Controllers\AturanK3Controller;
+use App\Http\Controllers\DimensiBahayaController;
 use App\Http\Controllers\EdukasiGiziController;
+use App\Http\Controllers\HierarkiNioshController;
 use App\Http\Controllers\JadwalKegiatanController;
+use App\Http\Controllers\KategoriResikoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PemeriksaanController;
 use App\Http\Controllers\PemeriksaanDokterController;
 use App\Http\Controllers\PesertaProlanisController;
+use App\Http\Controllers\UnitKerjaController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +54,37 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/register', [LoginController::class, 'register']);
         Route::put('/users/{id}', [LoginController::class, 'update']);
         Route::delete('/users/{id}', [LoginController::class, 'destroy']);
+
+        // CRUD Unit Kerja
+        Route::get('/unit-kerja', [UnitKerjaController::class, 'index']);
+        Route::post('/simpan-unit-kerja', [UnitKerjaController::class, 'simpanDataUnitKerja']);
+        Route::put('/update-unit-kerja/{id}', [UnitKerjaController::class, 'updateDataUnitKerja']);
+        Route::delete('/hapus-unit-kerja/{id}', [UnitKerjaController::class, 'hapusDataUnitKerja']);
+
+        //CRUD Dimensi Bahaya
+        Route::get('/dimensi-bahaya', [DimensiBahayaController::class, 'index']);
+        Route::post('/simpan-dimensi-bahaya', [DimensiBahayaController::class, 'simpanDataDimensiBahaya']);
+        Route::put('/update-dimensi-bahaya/{id}', [DimensiBahayaController::class, 'updateDataDimensiBahaya']);
+        Route::delete('/hapus-dimensi-bahaya/{id}', [DimensiBahayaController::class, 'hapusDataDimensiBahaya']);
+
+        //CRUD Kategori Resiko
+        Route::get('/kategori-resiko', [KategoriResikoController::class, 'index']);
+        Route::post('/simpan-kategori-resiko', [KategoriResikoController::class, 'simpanDataKategoriResiko']);
+        Route::put('/update-kategori-resiko/{id}', [KategoriResikoController::class, 'updateDataKategoriResiko']);
+        Route::delete('/hapus-kategori-resiko/{id}', [KategoriResikoController::class, 'hapusDataKategoriResiko']);
+
+        //CRUD Hierarki Niosh
+        Route::get('/hierarki-niosh', [HierarkiNioshController::class, 'index']);
+        Route::post('/simpan-hierarki-niosh', [HierarkiNioshController::class, 'simpanDataHierarkiNiosh']);
+        Route::put('/update-hierarki-niosh/{id}', [HierarkiNioshController::class, 'updateDataHierarkiNiosh']);
+        Route::delete('/hapus-hierarki-niosh/{id}', [HierarkiNioshController::class, 'hapusDataHierarkiNiosh']);
+
+        //API Aturan K3
+        Route::get('/aturan-k3', [AturanK3Controller::class, 'index']);
+        Route::post('/simpan-aturan-k3', [AturanK3Controller::class, 'simpanDataAturanK3']);
+        Route::put('/update-aturan-k3/{id}', [AturanK3Controller::class, 'updateDataAturanK3']);
+        Route::patch('/toggle-status-aturan-k3/{id}', [AturanK3Controller::class, 'toggleStatusAturanK3']);
+        Route::delete('/hapus-aturan-k3/{id}', [AturanK3Controller::class, 'hapusDataAturanK3']);
     });
 
 

@@ -31,21 +31,45 @@ type NavItem = {
 const SmartProlanisLogoFull = () => (
   <div className="flex items-center gap-2">
     <div className="flex items-center justify-center w-9 h-9 bg-brand-500 rounded-lg shadow-md flex-shrink-0">
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      <svg
+        className="w-5 h-5 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+        />
       </svg>
     </div>
     <div className="flex flex-col text-left">
-      <span className="text-[1.15rem] font-black leading-none text-gray-800 dark:text-white tracking-tight">Smart</span>
-      <span className="text-[0.6rem] font-bold tracking-[0.2em] text-brand-500 dark:text-brand-400">PROLANIS</span>
+      <span className="text-[1.15rem] font-black leading-none text-gray-800 dark:text-white tracking-tight">
+        Smart
+      </span>
+      <span className="text-[0.6rem] font-bold tracking-[0.2em] text-brand-500 dark:text-brand-400">
+        PROLANIS
+      </span>
     </div>
   </div>
 );
 
 const SmartProlanisLogoIcon = () => (
   <div className="flex items-center justify-center w-8 h-8 bg-brand-500 rounded-lg shadow-md flex-shrink-0 transition-all duration-300">
-    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    <svg
+      className="w-4 h-4 text-white"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+      />
     </svg>
   </div>
 );
@@ -59,7 +83,9 @@ const AppSidebar: React.FC = () => {
     type: "main" | "others";
     index: number;
   } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
+    {},
+  );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isActive = useCallback(
@@ -69,8 +95,8 @@ const AppSidebar: React.FC = () => {
 
   // Fungsi pengecekan hak akses (Role)
   const hasAccess = (allowedRoles?: number[]) => {
-    if (!allowedRoles) return true; 
-    if (!user) return false; 
+    if (!allowedRoles) return true;
+    if (!user) return false;
     if (user.role === 6) return true; // PIC otomatis akses semua
     return allowedRoles.includes(user.role);
   };
@@ -81,7 +107,7 @@ const AppSidebar: React.FC = () => {
     let dashboardName = "Dashboard Utama";
     if (user?.role === 2) dashboardName = "Dashboard Perawat";
     // Anda bisa tambahkan kondisi lain kelak, contoh:
-    else if (user?.role === 1) dashboardName = "Dashboard Dokter";
+    else if (user?.role === 1) dashboardName = "Dashboard";
     else if (user?.role === 3) dashboardName = "Dashboard Ahli Gizi";
     else if (user?.role === 4) dashboardName = "Dashboard Apoteker";
 
@@ -96,28 +122,42 @@ const AppSidebar: React.FC = () => {
         icon: <TableIcon />,
         subItems: [
           {
-            name: "Data Pengguna",
+            name: "Pengguna",
             path: "/data-pengguna",
             pro: false,
-            allowedRoles: [6,1], // Hanya PIC (6)
+            allowedRoles: [6, 1], // Hanya PIC (6)
           },
           {
-            name: "Peserta Prolanis",
-            path: "/peserta-prolanis",
+            name: "Unit Kerja",
+            path: "/unit-kerja",
             pro: false,
-            allowedRoles: [5, 6], // Administrasi (5) dan PIC (6)
+            allowedRoles: [1], 
           },
           {
-            name: "Jadwal Kegiatan",
-            path: "/jadwal-kegiatan",
+            name: "Dimensi Bahaya",
+            path: "/dimensi-bahaya",
             pro: false,
-            allowedRoles: [5, 6],
+            allowedRoles: [1],
           },
           {
-            name: "Data Pangan Lokal",
-            path: "/pangan-lokal",
+            name: "Kategori Resiko",
+            path: "/kategori-resiko",
             pro: false,
-            allowedRoles: [3, 6], // Ahli Gizi (3) dan PIC (6)
+            allowedRoles: [1], 
+          },
+
+          {
+            name: "Hierarki Niosh",
+            path: "/hierarki-niosh",
+            pro: false,
+            allowedRoles: [1], 
+          },
+
+          {
+            name: "Aturan K3",
+            path: "/aturan-k3",
+            pro: false,
+            allowedRoles: [1], 
           },
         ],
       },
@@ -137,7 +177,7 @@ const AppSidebar: React.FC = () => {
       //       name: "Arsip Pemerikasaan",
       //       path: "/arsip-pemeriksaan",
       //       pro: false,
-      //       allowedRoles: [1,2,3,6], 
+      //       allowedRoles: [1,2,3,6],
       //     },
       //   ],
       // },
@@ -196,7 +236,9 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => {
-    const accessibleItems = items.filter((item) => hasAccess(item.allowedRoles));
+    const accessibleItems = items.filter((item) =>
+      hasAccess(item.allowedRoles),
+    );
 
     return (
       <ul className="flex flex-col gap-4">
@@ -347,7 +389,6 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
-            
             {/* Bagian Menu Utama */}
             <div>
               <h2
@@ -385,7 +426,6 @@ const AppSidebar: React.FC = () => {
                 {renderMenuItems(othersItems, "others")}
               </div>
             )}
-            
           </div>
         </nav>
       </div>

@@ -24,6 +24,7 @@ class AturanK3Model extends Model
         'id_hierarki',
         'rekomendasi_mitigasi',
         'basis_temuan_tahap1',
+        'status_aturan',
     ];
 
 

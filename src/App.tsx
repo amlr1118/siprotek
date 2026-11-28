@@ -3,6 +3,11 @@ import SignIn from "./pages/AuthPages/SignIn";
 import NotFound from "./pages/OtherPage/NotFound";
 import PesertaProlanisComponent from "./components/master-data/PesertaProlanisComponent";
 import PenggunaComponent from "./components/master-data/PenggunaComponent";
+import UnitKerjaComponent from "./components/master-data/DataUnitKerja";
+import DimensiBahayaComponent from "./components/master-data/DimensiBahayaComponent";
+import KategoriResikoComponent from "./components/master-data/KategoriResikoComponent";
+import HierarkiNioshComponent from "./components/master-data/HierarkiNioshComponent";
+import AturanK3Component from "./components/master-data/AturanK3Component";
 import JadwalKegiatanComponent from "./components/master-data/JadwalKegiatanComponent";
 import DetailAbsen from "./components/dashboard/DetailAbsen";
 import ArsipKegiatan from "./components/arsip/ArsipKegiatanComponent";
@@ -38,8 +43,53 @@ export default function App() {
             <Route
               path="/data-pengguna"
               element={
-                <PrivateRoute allowedRoles={[6,1]}>
+                <PrivateRoute allowedRoles={[1]}>
                   <PenggunaComponent />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/unit-kerja"
+              element={
+                <PrivateRoute allowedRoles={[1]}>
+                  <UnitKerjaComponent />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/dimensi-bahaya"
+              element={
+                <PrivateRoute allowedRoles={[1]}>
+                  <DimensiBahayaComponent />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/kategori-resiko"
+              element={
+                <PrivateRoute allowedRoles={[1]}>
+                  <KategoriResikoComponent />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/hierarki-niosh"
+              element={
+                <PrivateRoute allowedRoles={[1]}>
+                  <HierarkiNioshComponent />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/aturan-k3"
+              element={
+                <PrivateRoute allowedRoles={[1]}>
+                  <AturanK3Component />
                 </PrivateRoute>
               }
             />
@@ -92,7 +142,7 @@ export default function App() {
             <Route
               path="/arsip-pemeriksaan"
               element={
-                <PrivateRoute allowedRoles={[1,2,3,6]}>
+                <PrivateRoute allowedRoles={[1, 2, 3, 6]}>
                   <ArsipPemeriksaanComponent />
                 </PrivateRoute>
               }
